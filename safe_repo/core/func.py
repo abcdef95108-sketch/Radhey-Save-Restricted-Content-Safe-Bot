@@ -228,6 +228,26 @@ def hhmmss(seconds):
 async def screenshot(video, duration, sender):
     if os.path.exists(f'{sender}.jpg'):
         return f'{sender}.jpg'
+    
+    # Check if ffmpeg is available
+    try:
+        ffmpeg_check = await asyncio.create_subprocess_exec(
+            "ffmpeg", "-version",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        await ffmpeg_check.communicate()
+        ffmpeg_available = True
+    except FileNotFoundError:
+        ffmpeg_available = False
+    
+    if not ffmpeg_available:
+        # If ffmpeg is not available, use a default thumbnail or skip screenshot
+        # For now, we'll just return None and handle it in the caller
+        logger.warning("ffmpeg not available, skipping screenshot generation")
+        return None
+    
+    # Proceed with ffmpeg if available
     time_stamp = hhmmss(int(duration)/2)
     out = dt.now().isoformat("_", "seconds") + ".jpg"
     cmd = ["ffmpeg",
