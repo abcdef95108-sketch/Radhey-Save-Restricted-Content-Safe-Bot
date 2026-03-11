@@ -27,6 +27,13 @@ app = Client(
     no_updates=False  # Ensure we receive all updates
 )
 
+# Initialize listeners attribute for pyromod compatibility
+from pyromod.listen.client import ListenerTypes
+app.listeners = {
+    ListenerTypes.MESSAGE: [],
+    ListenerTypes.CALLBACK_QUERY: []
+}
+
 
 async def restrict_bot():
     global BOT_ID, BOT_NAME, BOT_USERNAME
