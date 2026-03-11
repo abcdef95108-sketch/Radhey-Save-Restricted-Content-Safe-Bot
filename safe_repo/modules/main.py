@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 
-@app.on_message(filters.regex(r'https?://[^\s]+'))
+@app.on_message(filters.regex(r'https?://[^\s]+') & ~filters.command("batch") & ~filters.reply)
 async def single_link(_, message):
     user_id = message.chat.id
     lol = await chk_user(message, user_id)
