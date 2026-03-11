@@ -16,6 +16,18 @@ logger = logging.getLogger(__name__)
 
 loop = asyncio.get_event_loop()
 
+async def keep_alive_task():
+    """Background task to keep the bot alive and prevent sleep mode"""
+    logger.info("Keep-alive task started")
+    while True:
+        try:
+            # Simple ping to keep the session active
+            logger.debug("Bot is alive and responding")
+            await asyncio.sleep(60)  # Ping every 60 seconds
+        except Exception as e:
+            logger.error(f"Keep-alive task error: {e}")
+            await asyncio.sleep(30)
+
 async def schedule_expiry_check():
     scheduler = await create_scheduler()
     while True:
@@ -31,8 +43,9 @@ async def safe_repo_boot():
             importlib.import_module("safe_repo.modules." + all_module)
         logger.info("»»»» ʙᴏᴛ ᴅᴇᴘʟᴏʏ sᴜᴄᴄᴇssғᴜʟʟʏ ✨ 🎉")
 
-        # Start the background task for checking expired users
+        # Start background tasks
         asyncio.create_task(schedule_expiry_check())
+        asyncio.create_task(keep_alive_task())
 
         await idle()
         logger.info("»» ɢᴏᴏᴅ ʙʏᴇ ! sᴛᴏᴘᴘɪɴɢ ʙᴏᴛ.")

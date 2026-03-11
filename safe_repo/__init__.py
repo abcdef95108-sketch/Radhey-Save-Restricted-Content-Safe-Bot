@@ -15,33 +15,47 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-# Optimized Pyrogram client configuration for better stability
-# Increased sleep_threshold for large media uploads
+# Pyrogram client configuration optimized for maximum stability
 app = Client(
     ":RestrictBot:",
     api_id=API_ID,
     api_hash=API_HASH,
     bot_token=BOT_TOKEN,
-    workers=20,
-    sleep_threshold=300,  # 5 minutes for large file transfers
-    max_concurrent_transmissions=1  # Limit to 1 concurrent transfer to prevent timeouts
+    workers=10,  # Reduced from 20 to prevent resource exhaustion
+    sleep_threshold=180,  # Reduced from 300s to 3 minutes for faster recovery
+    max_concurrent_transmissions=1,  # Keep at 1 to prevent timeouts
+    reconnect_interval=5,  # Auto-reconnect interval in seconds
+    timeout=30,  # Increase timeout for API calls
+    no_updates=False  # Ensure we receive all updates
 )
 
 
 async def restrict_bot():
     global BOT_ID, BOT_NAME, BOT_USERNAME
-    await app.start()
-    getme = await app.get_me()
-    BOT_ID = getme.id
-    BOT_USERNAME = getme.username
-    if getme.last_name:
-        BOT_NAME = getme.first_name + " " + getme.last_name
-    else:
-        BOT_NAME = getme.first_name
-    logging.info(f"Bot initialized: {BOT_NAME} (@{BOT_USERNAME})")
+    try:
+        await app.start()
+        getme = await app.get_me()
+        BOT_ID = getme.id
+        BOT_USERNAME = getme.username
+        if getme.last_name:
+            BOT_NAME = getme.first_name + " " + getme.last_name
+        else:
+            BOT_NAME = getme.first_name
+        logging.info(f"Bot initialized: {BOT_NAME} (@{BOT_USERNAME})")
+    except Exception as e:
+        logging.error(f"Bot initialization failed: {e}")
+        raise e
 
 
 # Run initialization
-loop.run_until_complete(restrict_bot())
+try:
+    loop.run_until_complete(restrict_bot())
+except Exception as e:
+    logging.critical(f"Failed to start bot: {e}")
+    # Attempt to restart the bot
+    logging.info("Attempting to restart bot...")
+    import time
+    time.sleep(5)
+    loop.run_until_complete(restrict_bot())
 
 

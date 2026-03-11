@@ -1,0 +1,34 @@
+# Session files
+*.session
+*.session-journal
+
+# User data
+safe_repo/core/mongo/users_storage.json
+
+# Log files
+*.log
+bot.log
+monitor.log
+
+# Downloads
+downloads/
+
+# Temporary files
+*.pyc
+__pycache__/
+*.swp
+*.tmp
+
+# Configuration files with sensitive data
+config.py
+
+# Environment variables
+.env
+*.env
+
+# Heroku
+.heroku/
+Procfile.windows
+
+# Docker
+docker-compose.override.yml
