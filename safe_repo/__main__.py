@@ -65,14 +65,21 @@ async def safe_repo_boot():
         # Attempt to restart the bot after 5 seconds
         logger.info("Attempting to restart bot in 5 seconds...")
         await asyncio.sleep(5)
-        await safe_repo_boot()
+        # Instead of recursive call, just stop and let the outer loop restart
+        try:
+            from safe_repo import app
+            await app.stop()
+        except:
+            pass
+        raise
 
 if __name__ == "__main__":
-    try:
-        loop.run_until_complete(safe_repo_boot())
-    except Exception as e:
-        logger.error(f"Critical error: {e}")
-        # Attempt to restart the event loop
-        loop.run_until_complete(safe_repo_boot())
-    finally:
-        logger.info("Bot process completed")
+    while True:
+        try:
+            loop.run_until_complete(safe_repo_boot())
+            break  # Exit loop if boot completed successfully (idle was interrupted)
+        except Exception as e:
+            logger.error(f"Critical error: {e}")
+            logger.info("Bot will not restart automatically to prevent duplicate handlers")
+            break  # Exit loop to prevent duplicate handlers
+    logger.info("Bot process completed")
